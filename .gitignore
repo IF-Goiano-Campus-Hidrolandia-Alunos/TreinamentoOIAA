@@ -1,36 +1,36 @@
-# Dependency directories
+# Dependencias
 node_modules/
-web/node_modules/
 
-# Next.js build files
+# Builds
+dist/
 .next/
-web/.next/
 out/
-web/out/
+.vercel/
 
-# Local env files
+# Env files
+.env
 .env*.local
-web/.env*.local
+.env.production
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Debug logs
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Python caches and virtual environments
+# Python caches e ambientes virtuais
 __pycache__/
 *.py[cod]
 *$py.class
 .venv/
 venv/
 ENV/
-.env
 .ipynb_checkpoints/
 
-# Agents rules
+# Regras de agentes / arquivos auxiliares
 .agents/
 gemini-code-1782237913001.txt

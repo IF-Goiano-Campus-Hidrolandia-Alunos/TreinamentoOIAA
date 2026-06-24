@@ -1,0 +1,14 @@
+{
+  "name": "treinamento-oiaa-backend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "API serverless (Vercel Functions + Neon Postgres) do Desafio de IA - OIAA. Consumida pelo FrontEnd via VITE_API_URL.",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0"
+  },
+  "devDependencies": {
+    "@vercel/node": "^3.2.0",
+    "@types/node": "^20.14.13",
+    "typescript": "^5.5.4"
+  }
+}

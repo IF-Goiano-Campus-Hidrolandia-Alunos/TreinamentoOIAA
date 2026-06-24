@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap');
+
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
+
+@import 'tw-animate-css';
+
+:root {
+  --nlp: #a78bfa;
+  --vc: #67e8f9;
+  --am: #6ee7b7;
+}
+
+html, body, #root {
+  background: #07070b;
+  color: #e7e7ee;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.font-display {
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center;
+}
+
+.cyber-radial {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(167,139,250,0.15), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(103,232,249,0.12), transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(110,231,183,0.10), transparent 45%);
+}
+
+.scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.025) 0px,
+    rgba(255,255,255,0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+.parchment {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 220, 160, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(255, 180, 120, 0.06), transparent 50%),
+    #1a140d;
+  color: #e8d9bb;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.5);
+}
+
+.parchment .gap {
+  display: inline-block;
+  min-width: 6ch;
+  border-bottom: 1px dashed #c9a978;
+  color: transparent;
+  margin: 0 0.15ch;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+.flicker { animation: flicker 4s infinite; }
+
+.neon-text-nlp { color: var(--nlp); text-shadow: 0 0 10px rgba(167,139,250,0.6); }
+.neon-text-vc { color: var(--vc); text-shadow: 0 0 10px rgba(103,232,249,0.6); }
+.neon-text-am { color: var(--am); text-shadow: 0 0 10px rgba(110,231,183,0.6); }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-6px) }
+}
+.float-slow { animation: float-slow 5s ease-in-out infinite; }
+
