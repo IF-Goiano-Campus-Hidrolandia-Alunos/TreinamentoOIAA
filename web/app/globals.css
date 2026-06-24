@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base dark / cyberpunk. O front definitivo pode refinar estes tokens. */
+    --background: 230 25% 6%;
+    --foreground: 210 20% 96%;
+
+    --card: 230 22% 9%;
+    --card-foreground: 210 20% 96%;
+
+    --muted: 230 16% 16%;
+    --muted-foreground: 220 12% 65%;
+
+    --primary: 265 90% 66%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 230 16% 16%;
+    --secondary-foreground: 210 20% 96%;
+
+    --border: 230 18% 18%;
+    --input: 230 18% 18%;
+    --ring: 265 90% 66%;
+
+    --radius: 0.6rem;
+
+    /* Cores de identidade dos pilares */
+    --nlp: 270 95% 68%; /* Roxo / Violeta neon */
+    --vc: 190 95% 55%; /* Ciano / Azul eletrico neon */
+    --am: 150 85% 50%; /* Verde limao / Esmeralda neon */
+
+    --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
+      Menlo, Consolas, monospace;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(60rem 40rem at 80% -10%, hsl(var(--nlp) / 0.08), transparent),
+      radial-gradient(50rem 40rem at 0% 0%, hsl(var(--vc) / 0.06), transparent);
+    background-attachment: fixed;
+  }
+}
