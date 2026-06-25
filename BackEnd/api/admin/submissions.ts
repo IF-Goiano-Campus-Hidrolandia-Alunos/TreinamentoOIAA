@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { applyCors, getSql, isAdmin } from "../_db";
+import { applyCors, ensureSchema, getSql, isAdmin } from "../_db";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(res);
@@ -16,6 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const teamId = req.query.teamId as string;
 
   try {
+    await ensureSchema(sql);
     let rows: Record<string, any>[];
     if (teamId) {
       rows = (await sql`

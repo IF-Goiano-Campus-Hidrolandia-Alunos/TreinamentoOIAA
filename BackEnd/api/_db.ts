@@ -58,7 +58,7 @@ function generateAccessCode(): string {
 }
 
 let schemaReady = false;
-async function ensureSchema(sql: Sql) {
+export async function ensureSchema(sql: Sql) {
   if (schemaReady) return;
   await sql`
     CREATE TABLE IF NOT EXISTS teams (

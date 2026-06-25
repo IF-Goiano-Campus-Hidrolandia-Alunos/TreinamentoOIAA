@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { applyCors, deleteAnswerKey, getSql, isAdmin, setAnswerKey } from "../_db";
+import { applyCors, deleteAnswerKey, ensureSchema, getSql, isAdmin, setAnswerKey } from "../_db";
 import { parseCsvMap } from "../../lib/csv";
 import { GRADING_CONFIGS } from "../../lib/grading";
 import type { PillarId } from "../../lib/types";
@@ -16,6 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!isAdmin(req)) return res.status(401).json({ error: "nao autorizado" });
 
   try {
+    await ensureSchema(sql);
     if (req.method === "GET") {
       const rows = (await sql`
         SELECT pillar, stage, metric, updated_at,
