@@ -2,6 +2,7 @@ import { ExternalLink, ListChecks, Pencil, Target } from "lucide-react";
 import { ACCENT } from "../../../lib/accents";
 import { PILLAR_LINKS } from "../../../lib/links";
 import type { StageViewProps } from "./types";
+import { QuizComponent } from "../QuizComponent";
 
 export function UnguidedStage({
   pillar,
@@ -88,6 +89,8 @@ export function UnguidedStage({
             de progresso existir.
           </p>
         </section>
+
+        <QuizComponent pillar={pillar} stage={stage.id} />
       </div>
 
       <aside className="space-y-4">

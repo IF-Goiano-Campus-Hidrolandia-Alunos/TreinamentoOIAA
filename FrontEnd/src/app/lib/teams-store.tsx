@@ -55,7 +55,11 @@ function seed(): Team[] {
     name,
     tutor,
     createdAt: t(daysAgo),
-    members: members.map((m) => ({ id: uid("mem"), ...m })),
+    members: members.map((m) => ({
+      id: uid("mem"),
+      accessCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      ...m,
+    })),
   });
 
   const full = (pillar: PillarId, partial = false): ScoreEntry[] =>
@@ -118,6 +122,7 @@ interface TeamsContextValue {
     teamId: string,
     payload: { memberId: string; pillar: PillarId; stage: StageId; points: number }
   ) => void;
+  refreshFromApi: () => Promise<void>;
 }
 
 const TeamsContext = createContext<TeamsContextValue | null>(null);
@@ -271,8 +276,9 @@ export function TeamsProvider({ children }: { children: ReactNode }) {
           })
         );
       },
+      refreshFromApi,
     }),
-    [teams, mode]
+    [teams, mode, refreshFromApi]
   );
 
   return <TeamsContext.Provider value={value}>{children}</TeamsContext.Provider>;

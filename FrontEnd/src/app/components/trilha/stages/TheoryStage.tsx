@@ -3,6 +3,7 @@ import { BookOpen, CheckCircle2, Database, Trophy } from "lucide-react";
 import { ACCENT } from "../../../lib/accents";
 import { AncientManuscript } from "../../manuscript/AncientManuscript";
 import type { StageViewProps } from "./types";
+import { QuizComponent } from "../QuizComponent";
 
 function PillarFlavor({ pillar }: { pillar: StageViewProps["pillar"] }) {
   if (pillar === "nlp") return <AncientManuscript />;
@@ -128,6 +129,8 @@ export function TheoryStage({
             ))}
           </ul>
         </section>
+
+        <QuizComponent pillar={pillar} stage={stage.id} />
       </div>
 
       <aside className="space-y-4">

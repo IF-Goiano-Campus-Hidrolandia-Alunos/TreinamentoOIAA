@@ -45,6 +45,15 @@ function uid(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function generateAccessCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 let schemaReady = false;
 async function ensureSchema(sql: Sql) {
   if (schemaReady) return;
@@ -61,7 +70,26 @@ async function ensureSchema(sql: Sql) {
       id TEXT PRIMARY KEY,
       team_id TEXT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
-      scores JSONB NOT NULL DEFAULT '[]'::jsonb
+      scores JSONB NOT NULL DEFAULT '[]'::jsonb,
+      access_code TEXT
+    )
+  `;
+  try {
+    await sql`ALTER TABLE members ADD COLUMN IF NOT EXISTS access_code TEXT`;
+  } catch (e) {}
+  try {
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS members_access_code_idx ON members(access_code)`;
+  } catch (e) {}
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS submissions (
+      id TEXT PRIMARY KEY,
+      member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+      pillar TEXT NOT NULL,
+      stage TEXT NOT NULL,
+      points INTEGER NOT NULL,
+      detail JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TEXT NOT NULL
     )
   `;
   schemaReady = true;
@@ -89,7 +117,14 @@ export async function listTeams(sql: Sql): Promise<Team[]> {
   }
   for (const m of memberRows) {
     const team = map.get(m.team_id);
-    if (team) team.members.push({ id: m.id, name: m.name, scores: parseScores(m.scores) });
+    if (team) {
+      team.members.push({
+        id: m.id,
+        name: m.name,
+        scores: parseScores(m.scores),
+        accessCode: m.access_code || undefined,
+      });
+    }
   }
   return [...map.values()];
 }
@@ -105,8 +140,9 @@ export async function createTeam(
   const members: Member[] = [];
   for (const name of input.members) {
     const mid = uid("mem");
-    await sql`INSERT INTO members (id, team_id, name, scores) VALUES (${mid}, ${id}, ${name}, '[]'::jsonb)`;
-    members.push({ id: mid, name, scores: [] });
+    const code = generateAccessCode();
+    await sql`INSERT INTO members (id, team_id, name, scores, access_code) VALUES (${mid}, ${id}, ${name}, '[]'::jsonb, ${code})`;
+    members.push({ id: mid, name, scores: [], accessCode: code });
   }
   return { id, name: input.name, tutor: input.tutor, createdAt, members };
 }

@@ -4,6 +4,7 @@ import { PILLAR_LINKS } from "../../../lib/links";
 import { CodeViewer } from "../CodeViewer";
 import type { StageMode } from "../../../lib/types";
 import type { StageViewProps } from "./types";
+import { MetricSubmissionComponent } from "../MetricSubmissionComponent";
 
 const TABS: { id: StageMode; label: string; icon: typeof Blocks }[] = [
   { id: "blocks", label: "Com blocos", icon: Blocks },
@@ -36,6 +37,8 @@ export function FromScratchStage({
         </section>
 
         <ModeView pillar={pillar} stage={stage} code={code} />
+
+        <MetricSubmissionComponent pillar={pillar} stage={stage.id} />
       </div>
 
       <aside className="space-y-4">

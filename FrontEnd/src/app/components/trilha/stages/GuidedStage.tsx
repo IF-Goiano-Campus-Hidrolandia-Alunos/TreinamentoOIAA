@@ -3,6 +3,7 @@ import { ExternalLink, Lightbulb, ListChecks } from "lucide-react";
 import { ACCENT } from "../../../lib/accents";
 import { PILLAR_LINKS } from "../../../lib/links";
 import type { StageViewProps } from "./types";
+import { QuizComponent } from "../QuizComponent";
 
 export function GuidedStage({
   pillar,
@@ -72,6 +73,8 @@ export function GuidedStage({
             })}
           </ul>
         </section>
+
+        <QuizComponent pillar={pillar} stage={stage.id} />
       </div>
 
       <aside className="space-y-4">
@@ -92,7 +95,7 @@ export function GuidedStage({
                   key={d}
                   className={`rounded-md border ${a.border} ${a.bgSoft} px-3 py-2 text-sm text-white/80`}
                 >
-                  <span className={a.text}>💡</span> {d}
+                  <span className={a.text}>▸</span> {d}
                 </div>
               ))}
             </div>

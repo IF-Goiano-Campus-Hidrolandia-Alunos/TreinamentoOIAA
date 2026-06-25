@@ -4,6 +4,7 @@ import { ACCENT } from "../../../lib/accents";
 import { countPlaceholders } from "../../../lib/code-snippets";
 import { CodeViewer } from "../CodeViewer";
 import type { StageViewProps } from "./types";
+import { MetricSubmissionComponent } from "../MetricSubmissionComponent";
 
 export function FillBlanksStage({
   pillar,
@@ -39,6 +40,8 @@ export function FillBlanksStage({
         {code.blocks.map((b) => (
           <CodeViewer key={b.id} block={b} pillar={pillar} />
         ))}
+        
+        <MetricSubmissionComponent pillar={pillar} stage={stage.id} />
       </div>
 
       <aside className="space-y-4">

@@ -19,6 +19,7 @@ export interface Member {
   id: string;
   name: string;
   scores: ScoreEntry[];
+  accessCode?: string;
 }
 
 export interface Team {
