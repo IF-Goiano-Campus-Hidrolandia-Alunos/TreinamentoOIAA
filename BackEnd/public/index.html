@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API · Desafio de IA (OIAA)</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; min-height: 100vh; display: grid; place-items: center;
+        background: #07070b; color: #e5e7eb;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      .card {
+        max-width: 560px; padding: 40px; border: 1px solid #1f2430; border-radius: 16px;
+        background: #0c0c12; box-shadow: 0 0 60px -20px #7c3aed55;
+      }
+      h1 { margin: 0 0 8px; font-size: 22px; }
+      p { color: #9ca3af; line-height: 1.6; }
+      code { background: #11131b; border: 1px solid #1f2430; padding: 2px 6px; border-radius: 6px; color: #a5b4fc; }
+      .ok { color: #34d399; } .tag { color: #22d3ee; font-family: monospace; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+      ul { color: #9ca3af; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="tag">Desafio de IA · OIAA</div>
+      <h1>API do BackEnd <span class="ok">online</span></h1>
+      <p>
+        Este projeto e <strong>somente a API</strong> (sem pagina). A interface fica no
+        projeto do FrontEnd. Endpoints disponiveis:
+      </p>
+      <ul>
+        <li><code>GET /api/teams</code> — lista os times</li>
+        <li><code>POST /api/teams</code> — cria um time</li>
+        <li><code>DELETE /api/teams?id=...</code> — remove (header x-admin-token)</li>
+        <li><code>POST /api/scores</code> — lanca nota (header x-admin-token)</li>
+      </ul>
+      <p>
+        Se <code>/api/teams</code> responder <code>{"error":"no-db"}</code>, falta definir a
+        variavel <code>DATABASE_URL</code> (Neon) neste projeto na Vercel.
+      </p>
+    </div>
+  </body>
+</html>
