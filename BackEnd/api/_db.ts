@@ -215,6 +215,12 @@ export async function setAnswerKey(
   return Object.keys(keys).length;
 }
 
+export async function deleteAnswerKey(sql: Sql, pillar: string, stage: string): Promise<boolean> {
+  await ensureSchema(sql);
+  const rows = (await sql`DELETE FROM answer_keys WHERE pillar = ${pillar} AND stage = ${stage} RETURNING pillar`) as Record<string, any>[];
+  return rows.length > 0;
+}
+
 // ---- rate limit / tentativas ----
 
 export async function countAttempts(

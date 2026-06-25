@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { applyCors, getSql, isAdmin, setAnswerKey } from "../_db";
+import { applyCors, deleteAnswerKey, getSql, isAdmin, setAnswerKey } from "../_db";
 import { parseCsvMap } from "../../lib/csv";
 import { GRADING_CONFIGS } from "../../lib/grading";
 import type { PillarId } from "../../lib/types";
@@ -60,6 +60,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const count = await setAnswerKey(sql, pillarClean, stageClean, metricResolved, keys);
       return res.status(200).json({ ok: true, pillar: pillarClean, stage: stageClean, metric: metricResolved, count });
+    }
+
+    if (req.method === "DELETE") {
+      const pillar = typeof req.query.pillar === "string" ? req.query.pillar.toLowerCase() : "";
+      const stage = typeof req.query.stage === "string" ? req.query.stage.toLowerCase() : "";
+      if (!pillar || !stage) return res.status(400).json({ error: "pillar e stage obrigatorios" });
+      const ok = await deleteAnswerKey(sql, pillar, stage);
+      return res.status(ok ? 200 : 404).json({ ok });
     }
 
     return res.status(405).json({ error: "metodo nao suportado" });

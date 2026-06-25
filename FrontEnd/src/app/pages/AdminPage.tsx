@@ -199,6 +199,21 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
     }
   };
 
+  const handleDeleteAnswerKey = async (pillar: string, stage: string) => {
+    if (mode !== "api") return;
+    try {
+      const res = await fetch(
+        api(`/api/admin/answer-key?pillar=${pillar}&stage=${stage}`),
+        { method: "DELETE", headers: { "x-admin-token": ADMIN_TOKEN_DEMO } },
+      );
+      if (!res.ok) throw new Error("Falha ao remover gabarito.");
+      toast.success("Gabarito removido.");
+      await loadAnswerKeys();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao remover gabarito.");
+    }
+  };
+
   // Carregar submissoes se estiver na aba correspondente
   useEffect(() => {
     if (activeTab !== "submissions") return;
@@ -963,6 +978,7 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
                         <th className="p-3">Metrica</th>
                         <th className="p-3 text-right">Linhas</th>
                         <th className="p-3">Atualizado</th>
+                        <th className="p-3"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -974,6 +990,15 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
                           <td className="p-3 text-right font-bold text-white">{k.count}</td>
                           <td className="p-3 text-white/40 font-mono whitespace-nowrap">
                             {new Date(k.updatedAt).toLocaleString("pt-BR")}
+                          </td>
+                          <td className="p-3 text-right">
+                            <button
+                              onClick={() => handleDeleteAnswerKey(k.pillar, k.stage)}
+                              className="p-1.5 rounded-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-400/40 transition-colors cursor-pointer"
+                              title="Remover gabarito"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </td>
                         </tr>
                       ))}
