@@ -13,7 +13,9 @@ import {
   LayoutDashboard, 
   History, 
   PlusSquare,
-  ClipboardCheck
+  ClipboardCheck,
+  UploadCloud,
+  FileCheck2
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
@@ -123,7 +125,9 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
   const { teams, ranked, submitScore, deleteTeam, refreshFromApi, mode } = useTeams();
   const ranks = ranked({ sortBy: "groupScore", order: "desc" });
 
-  const [activeTab, setActiveTab] = useState<"overview" | "teams" | "submissions" | "override">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "teams" | "submissions" | "override" | "answerkeys"
+  >("overview");
 
   const [teamId, setTeamId] = useState("");
   const [memberId, setMemberId] = useState("");
@@ -138,7 +142,62 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
   const [searchQuery, setSearchQuery] = useState("");
   const [backfilling, setBackfilling] = useState(false);
 
+  // Gabaritos (CSV auto-scorer)
+  type AnswerKeyStatus = { pillar: string; stage: string; metric: string; count: number; updatedAt: string };
+  const [answerKeys, setAnswerKeys] = useState<AnswerKeyStatus[]>([]);
+  const [akPillar, setAkPillar] = useState<PillarId>("vc");
+  const [akStage, setAkStage] = useState<StageId>("fill-blanks");
+  const [akUploading, setAkUploading] = useState(false);
+
   const team = useMemo(() => teams.find((t) => t.id === teamId), [teams, teamId]);
+
+  async function loadAnswerKeys() {
+    if (mode !== "api") return;
+    try {
+      const r = await fetch(api("/api/admin/answer-key"), {
+        headers: { "x-admin-token": ADMIN_TOKEN_DEMO },
+      });
+      if (r.ok) {
+        const d = (await r.json()) as { keys: AnswerKeyStatus[] };
+        setAnswerKeys(d.keys || []);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "answerkeys") loadAnswerKeys();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, mode]);
+
+  const handleAnswerKeyUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (mode !== "api") {
+      toast.error("Cadastro de gabarito disponivel apenas no modo API (com backend).");
+      return;
+    }
+    setAkUploading(true);
+    try {
+      const csv = await file.text();
+      const res = await fetch(api("/api/admin/answer-key"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-token": ADMIN_TOKEN_DEMO },
+        body: JSON.stringify({ pillar: akPillar, stage: akStage, csv }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha ao salvar o gabarito.");
+      toast.success(`Gabarito salvo: ${data.count} linhas (metrica: ${data.metric}).`);
+      await loadAnswerKeys();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Erro ao enviar o gabarito.");
+    } finally {
+      setAkUploading(false);
+    }
+  };
 
   // Carregar submissoes se estiver na aba correspondente
   useEffect(() => {
@@ -473,6 +532,17 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
           <PlusSquare className="w-4 h-4" />
           <span>Lancar Notas</span>
         </button>
+        <button
+          onClick={() => setActiveTab("answerkeys")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-mono uppercase tracking-widest border-b-2 transition-all cursor-pointer ${
+            activeTab === "answerkeys"
+              ? "border-violet-500 text-white font-medium"
+              : "border-transparent text-white/50 hover:text-white hover:border-white/10"
+          }`}
+        >
+          <FileCheck2 className="w-4 h-4" />
+          <span>Gabaritos (Auto-correcao)</span>
+        </button>
       </div>
 
       <div className="mt-8">
@@ -803,6 +873,114 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
                   Ele substitui a pontuacao atual daquela etapa/pilar no perfil do integrante.
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: GABARITOS (CSV AUTO-SCORER) */}
+        {activeTab === "answerkeys" && (
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="rounded-xl border border-white/10 bg-[#0c0c12] p-6 space-y-4 lg:col-span-1">
+              <div className="text-xs uppercase tracking-widest text-white/40 font-mono">
+                Cadastrar gabarito (CSV)
+              </div>
+              <p className="text-xs text-white/50 leading-relaxed">
+                Envie o CSV de respostas verdadeiras (colunas{" "}
+                <span className="font-mono text-white/70">id,valor</span>). O aluno envia as previsoes
+                e o servidor calcula a metrica automaticamente. Metrica: VC/NLP = acuracia, AM = RMSE.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-xs text-white/50 mb-1.5 font-mono">Pilar</div>
+                  <Select value={akPillar} onValueChange={(v) => setAkPillar(v as PillarId)}>
+                    <SelectTrigger className="w-full bg-white/[0.04] border-white/10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(["nlp", "vc", "am"] as PillarId[]).map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {PILLARS[p].shortName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="text-xs text-white/50 mb-1.5 font-mono">Etapa</div>
+                  <Select value={akStage} onValueChange={(v) => setAkStage(v as StageId)}>
+                    <SelectTrigger className="w-full bg-white/[0.04] border-white/10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(["fill-blanks", "from-scratch"] as StageId[]).map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {getStage(s).title.replace(/^\d+\.\s*/, "")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <label
+                className={`flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-violet-500/40 bg-violet-600/5 text-sm text-white cursor-pointer hover:bg-violet-600/10 transition-all ${
+                  akUploading ? "opacity-50 pointer-events-none" : ""
+                }`}
+              >
+                <UploadCloud className="w-4 h-4" />
+                <span>{akUploading ? "Enviando gabarito..." : "Selecionar CSV do gabarito"}</span>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={handleAnswerKeyUpload}
+                  disabled={akUploading}
+                />
+              </label>
+              {mode !== "api" && (
+                <p className="text-[11px] text-amber-400">
+                  Disponivel apenas com backend (modo API).
+                </p>
+              )}
+            </div>
+
+            <div className="lg:col-span-2 space-y-3">
+              <div className="text-xs uppercase tracking-widest text-white/40 font-mono">
+                Gabaritos cadastrados
+              </div>
+              {answerKeys.length === 0 ? (
+                <div className="rounded-xl border border-white/5 bg-[#0b0b14] p-8 text-center text-white/40 text-sm">
+                  Nenhum gabarito cadastrado ainda.
+                </div>
+              ) : (
+                <div className="rounded-xl border border-white/10 bg-[#0c0c12] overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-white/10 bg-white/[0.02] text-white/60 font-mono uppercase tracking-wider text-[10px]">
+                        <th className="p-3">Pilar</th>
+                        <th className="p-3">Etapa</th>
+                        <th className="p-3">Metrica</th>
+                        <th className="p-3 text-right">Linhas</th>
+                        <th className="p-3">Atualizado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {answerKeys.map((k) => (
+                        <tr key={`${k.pillar}-${k.stage}`} className="border-b border-white/5">
+                          <td className="p-3 font-mono text-violet-400 uppercase">{k.pillar}</td>
+                          <td className="p-3 font-mono text-white/70">{k.stage}</td>
+                          <td className="p-3 text-white/80">{k.metric}</td>
+                          <td className="p-3 text-right font-bold text-white">{k.count}</td>
+                          <td className="p-3 text-white/40 font-mono whitespace-nowrap">
+                            {new Date(k.updatedAt).toLocaleString("pt-BR")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

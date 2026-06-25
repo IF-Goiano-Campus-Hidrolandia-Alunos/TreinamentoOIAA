@@ -68,3 +68,40 @@ export function calculateMetricPoints(pillar: PillarId, stage: StageId, value: n
 
   return Math.round(maxPoints * norm);
 }
+
+// ---- metricas a partir de previsoes vs gabarito (CSV auto-scorer) ----
+
+/** Acuracia: fracao de ids cujo rotulo previsto bate com o gabarito (0..1). */
+export function computeAccuracy(
+  predMap: Record<string, string>,
+  keyMap: Record<string, string | number>,
+): number {
+  const ids = Object.keys(keyMap);
+  if (ids.length === 0) return 0;
+  let correct = 0;
+  for (const id of ids) {
+    const truth = String(keyMap[id]).trim();
+    const pred = (predMap[id] ?? "").trim();
+    if (pred !== "" && pred === truth) correct++;
+  }
+  return correct / ids.length;
+}
+
+/** RMSE entre previsao e gabarito numericos (ausente/invalido conta como erro). */
+export function computeRmse(
+  predMap: Record<string, string>,
+  keyMap: Record<string, string | number>,
+): number {
+  const ids = Object.keys(keyMap);
+  if (ids.length === 0) return Number.POSITIVE_INFINITY;
+  let sumSq = 0;
+  for (const id of ids) {
+    const truth = Number(keyMap[id]);
+    const predRaw = predMap[id];
+    const pred = predRaw === undefined || predRaw === "" ? NaN : Number(predRaw);
+    const p = Number.isFinite(pred) ? pred : 0; // ausencia/invalido = 0 -> penaliza
+    const diff = p - (Number.isFinite(truth) ? truth : 0);
+    sumSq += diff * diff;
+  }
+  return Math.sqrt(sumSq / ids.length);
+}

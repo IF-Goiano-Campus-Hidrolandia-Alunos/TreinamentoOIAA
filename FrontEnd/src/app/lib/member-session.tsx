@@ -23,7 +23,7 @@ interface MemberSessionContextValue {
   submitStageScore: (
     pillar: PillarId,
     stage: StageId,
-    kind: "quiz" | "metric",
+    kind: "quiz" | "metric" | "csv",
     payload: any
   ) => Promise<{ points: number; best: number }>;
 }
@@ -112,7 +112,7 @@ export function MemberSessionProvider({ children }: { children: ReactNode }) {
   const submitStageScore = async (
     pillar: PillarId,
     stage: StageId,
-    kind: "quiz" | "metric",
+    kind: "quiz" | "metric" | "csv",
     payload: any
   ): Promise<{ points: number; best: number }> => {
     if (!member) {
@@ -154,11 +154,11 @@ export function MemberSessionProvider({ children }: { children: ReactNode }) {
       const maxPoints = maxPtsMap[stage] || 0;
       let points = 0;
 
-      if (kind === "quiz") {
+      if (kind === "quiz" || kind === "csv") {
         // Modo local (sem backend) e apenas demonstrativo: o gabarito NAO fica no
-        // bundle do front (anti-cola), entao nao da pra corrigir aqui. A correcao
-        // real acontece no servidor (/api/submit) quando ha backend. Em demo,
-        // concede a pontuacao cheia so para o fluxo ficar navegavel.
+        // bundle do front (anti-cola) e nao ha CSV de referencia local, entao nao
+        // da pra corrigir aqui. A correcao real acontece no servidor (/api/submit)
+        // quando ha backend. Em demo, concede a pontuacao cheia para o fluxo fluir.
         points = maxPoints;
       } else {
         // Métrica local

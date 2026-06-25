@@ -95,6 +95,18 @@ async function ensureSchema(sql: Sql) {
       created_at TEXT NOT NULL
     )
   `;
+  // Gabaritos (answer keys) cadastrados pelo tutor para auto-correcao por CSV.
+  // keys = { "<id da linha>": <label|valor verdadeiro> }; metric = 'accuracy' | 'rmse'.
+  await sql`
+    CREATE TABLE IF NOT EXISTS answer_keys (
+      pillar TEXT NOT NULL,
+      stage TEXT NOT NULL,
+      metric TEXT NOT NULL,
+      keys JSONB NOT NULL,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (pillar, stage)
+    )
+  `;
   schemaReady = true;
 }
 
@@ -169,6 +181,58 @@ export async function submitScore(
   scores.push({ pillar: p.pillar as ScoreEntry["pillar"], stage: p.stage as ScoreEntry["stage"], points: p.points });
   await sql`UPDATE members SET scores = ${JSON.stringify(scores)}::jsonb WHERE id = ${p.memberId}`;
   return true;
+}
+
+// ---- gabaritos (answer keys) ----
+
+export async function getAnswerKey(
+  sql: Sql,
+  pillar: string,
+  stage: string,
+): Promise<{ metric: string; keys: Record<string, string | number> } | null> {
+  await ensureSchema(sql);
+  const rows = (await sql`SELECT metric, keys FROM answer_keys WHERE pillar = ${pillar} AND stage = ${stage} LIMIT 1`) as Record<string, any>[];
+  if (rows.length === 0) return null;
+  const keys = typeof rows[0].keys === "string" ? JSON.parse(rows[0].keys) : rows[0].keys;
+  return { metric: rows[0].metric, keys };
+}
+
+export async function setAnswerKey(
+  sql: Sql,
+  pillar: string,
+  stage: string,
+  metric: string,
+  keys: Record<string, string | number>,
+): Promise<number> {
+  await ensureSchema(sql);
+  const updatedAt = new Date().toISOString();
+  await sql`
+    INSERT INTO answer_keys (pillar, stage, metric, keys, updated_at)
+    VALUES (${pillar}, ${stage}, ${metric}, ${JSON.stringify(keys)}::jsonb, ${updatedAt})
+    ON CONFLICT (pillar, stage)
+    DO UPDATE SET metric = EXCLUDED.metric, keys = EXCLUDED.keys, updated_at = EXCLUDED.updated_at
+  `;
+  return Object.keys(keys).length;
+}
+
+// ---- rate limit / tentativas ----
+
+export async function countAttempts(
+  sql: Sql,
+  memberId: string,
+  pillar: string,
+  stage: string,
+): Promise<number> {
+  const rows = (await sql`SELECT COUNT(*)::int AS n FROM submissions WHERE member_id = ${memberId} AND pillar = ${pillar} AND stage = ${stage}`) as Record<string, any>[];
+  return rows[0]?.n ?? 0;
+}
+
+/** Epoch ms da ultima submissao do integrante (qualquer etapa), ou null. */
+export async function lastSubmissionAt(sql: Sql, memberId: string): Promise<number | null> {
+  const rows = (await sql`SELECT created_at FROM submissions WHERE member_id = ${memberId} ORDER BY created_at DESC LIMIT 1`) as Record<string, any>[];
+  if (rows.length === 0) return null;
+  const t = Date.parse(rows[0].created_at);
+  return Number.isFinite(t) ? t : null;
 }
 
 // ---- validacao leve (sem dependencias externas) ----

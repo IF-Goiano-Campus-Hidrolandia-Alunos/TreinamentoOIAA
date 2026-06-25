@@ -4,7 +4,7 @@ import { useMemberSession } from "../../lib/member-session";
 import { useTeams } from "../../lib/teams-store";
 import { ACCENT } from "../../lib/accents";
 import { toast } from "sonner";
-import { Award, AlertCircle, Loader2, Send, HelpCircle } from "lucide-react";
+import { Award, AlertCircle, Loader2, Send, HelpCircle, UploadCloud } from "lucide-react";
 import type { PillarId, StageId } from "../../lib/types";
 
 interface MetricSubmissionComponentProps {
@@ -55,6 +55,7 @@ export function MetricSubmissionComponent({ pillar, stage }: MetricSubmissionCom
   const [selectedMode, setSelectedMode] = useState<"blocks" | "scratch">("blocks");
   const [submitting, setSubmitting] = useState(false);
   const [estimatedPoints, setEstimatedPoints] = useState<number | null>(null);
+  const [csvSubmitting, setCsvSubmitting] = useState(false);
 
   // Obter pontuacao atual se houver
   const currentBestScore = (() => {
@@ -123,6 +124,29 @@ export function MetricSubmissionComponent({ pillar, stage }: MetricSubmissionCom
       toast.error(err.message || "Erro ao enviar metrica.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!member) {
+      toast.error("Voce precisa se identificar primeiro.");
+      return;
+    }
+    setCsvSubmitting(true);
+    try {
+      const text = await file.text();
+      const payload: any = { csv: text };
+      if (stage === "from-scratch") payload.mode = selectedMode;
+      const result = await submitStageScore(pillar, stage, "csv", payload);
+      toast.success(`CSV corrigido! Pontos: ${result.points} (Melhor: ${result.best})`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Erro ao corrigir o CSV.");
+    } finally {
+      setCsvSubmitting(false);
     }
   };
 
@@ -244,6 +268,37 @@ export function MetricSubmissionComponent({ pillar, stage }: MetricSubmissionCom
           )}
         </button>
       </form>
+
+      <div className="border-t border-white/5 pt-5 space-y-3">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-white/40 font-mono">
+          <UploadCloud className="w-3.5 h-3.5" /> Correcao automatica por CSV (estilo Kaggle)
+        </div>
+        <p className="text-xs text-white/50 leading-relaxed">
+          Envie o arquivo <span className="font-mono text-white/70">submission.csv</span> (colunas{" "}
+          <span className="font-mono text-white/70">id,valor</span>). O servidor compara com o
+          gabarito cadastrado pelo tutor e calcula a {config.name} automaticamente — sem digitar a
+          metrica manualmente.
+        </p>
+        <label
+          className={`flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed ${a.border} ${a.bgSoft} text-sm text-white cursor-pointer hover:bg-white/5 transition-all ${
+            csvSubmitting ? "opacity-50 pointer-events-none" : ""
+          }`}
+        >
+          {csvSubmitting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <UploadCloud className="w-4 h-4" />
+          )}
+          <span>{csvSubmitting ? "Corrigindo CSV..." : "Selecionar e enviar CSV de previsoes"}</span>
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={handleCsvUpload}
+            disabled={csvSubmitting}
+          />
+        </label>
+      </div>
     </div>
   );
 }
