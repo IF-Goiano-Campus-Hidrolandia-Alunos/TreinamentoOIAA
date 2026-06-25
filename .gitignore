@@ -34,3 +34,11 @@ ENV/
 # Regras de agentes / arquivos auxiliares
 .agents/
 gemini-code-1782237913001.txt
+
+# Credenciais locais do banco (NUNCA commitar)
+Neon.txt
+neon.txt
+
+# Notas/prompts internos: versiona apenas os README.md
+*.md
+!README.md
