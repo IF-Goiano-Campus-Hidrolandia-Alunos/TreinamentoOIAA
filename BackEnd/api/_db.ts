@@ -22,7 +22,10 @@ type Sql = ReturnType<typeof neon>;
 export function applyCors(res: { setHeader: (k: string, v: string) => void }) {
   res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-admin-token");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, x-admin-token, x-member-code, x-access-code",
+  );
   res.setHeader("Access-Control-Max-Age", "86400");
 }
 
