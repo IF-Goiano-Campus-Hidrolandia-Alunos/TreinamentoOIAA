@@ -107,6 +107,53 @@ export async function ensureSchema(sql: Sql) {
       PRIMARY KEY (pillar, stage)
     )
   `;
+
+  // Seed de gabaritos padrao (templates) se a tabela estiver vazia
+  try {
+    const countKeys = (await sql`SELECT COUNT(*)::int AS n FROM answer_keys`) as Record<string, any>[];
+    if (countKeys[0]?.n === 0) {
+      const updatedAt = new Date().toISOString();
+      
+      // VC - fill-blanks e from-scratch (Acuracia)
+      const vcKeys = {
+        "1": "14", "2": "1", "3": "0", "4": "3", "5": "14",
+        "6": "2", "7": "5", "8": "14", "9": "1", "10": "14"
+      };
+      await sql`
+        INSERT INTO answer_keys (pillar, stage, metric, keys, updated_at)
+        VALUES 
+          ('vc', 'fill-blanks', 'accuracy', ${JSON.stringify(vcKeys)}::jsonb, ${updatedAt}),
+          ('vc', 'from-scratch', 'accuracy', ${JSON.stringify(vcKeys)}::jsonb, ${updatedAt})
+      `;
+
+      // AM - fill-blanks e from-scratch (RMSE)
+      const amKeys = {
+        "1": "4.5", "2": "3.0", "3": "1.5", "4": "5.0", "5": "4.0",
+        "6": "2.0", "7": "3.5", "8": "4.0", "9": "5.0", "10": "3.0"
+      };
+      await sql`
+        INSERT INTO answer_keys (pillar, stage, metric, keys, updated_at)
+        VALUES 
+          ('am', 'fill-blanks', 'rmse', ${JSON.stringify(amKeys)}::jsonb, ${updatedAt}),
+          ('am', 'from-scratch', 'rmse', ${JSON.stringify(amKeys)}::jsonb, ${updatedAt})
+      `;
+
+      // NLP - fill-blanks e from-scratch (Acuracia)
+      const nlpKeys = {
+        "1": "cerrado", "2": "goias", "3": "modelo", "4": "token", "5": "palavra",
+        "6": "manuscrito", "7": "livro", "8": "contexto", "9": "lacuna", "10": "acuracia"
+      };
+      await sql`
+        INSERT INTO answer_keys (pillar, stage, metric, keys, updated_at)
+        VALUES 
+          ('nlp', 'fill-blanks', 'accuracy', ${JSON.stringify(nlpKeys)}::jsonb, ${updatedAt}),
+          ('nlp', 'from-scratch', 'accuracy', ${JSON.stringify(nlpKeys)}::jsonb, ${updatedAt})
+      `;
+    }
+  } catch (e) {
+    console.warn("Falha ao semear gabaritos padrao:", e);
+  }
+
   schemaReady = true;
 }
 

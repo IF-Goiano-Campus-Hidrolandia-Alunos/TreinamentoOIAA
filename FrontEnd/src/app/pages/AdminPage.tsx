@@ -214,6 +214,36 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
     }
   };
 
+  const handleDownloadAnswerKey = async (pillar: string, stage: string) => {
+    if (mode !== "api") return;
+    try {
+      const res = await fetch(
+        api(`/api/admin/answer-key?pillar=${pillar}&stage=${stage}`),
+        { headers: { "x-admin-token": ADMIN_TOKEN_DEMO } }
+      );
+      if (!res.ok) throw new Error("Falha ao baixar o gabarito.");
+      const data = (await res.json()) as { metric: string; keys: Record<string, string | number> };
+      
+      const rows = [["id", "valor"]];
+      for (const [id, val] of Object.entries(data.keys)) {
+        rows.push([id, String(val)]);
+      }
+      const csvContent = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `gabarito_${pillar}_${stage}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Gabarito baixado com sucesso!");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao baixar gabarito.");
+    }
+  };
+
   // Carregar submissoes se estiver na aba correspondente
   useEffect(() => {
     if (activeTab !== "submissions") return;
@@ -992,13 +1022,22 @@ function AdminDashboard({ onLogout, adminToken }: { onLogout: () => void; adminT
                             {new Date(k.updatedAt).toLocaleString("pt-BR")}
                           </td>
                           <td className="p-3 text-right">
-                            <button
-                              onClick={() => handleDeleteAnswerKey(k.pillar, k.stage)}
-                              className="p-1.5 rounded-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-400/40 transition-colors cursor-pointer"
-                              title="Remover gabarito"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleDownloadAnswerKey(k.pillar, k.stage)}
+                                className="p-1.5 rounded-md border border-white/10 text-white/40 hover:text-violet-400 hover:border-violet-400/40 transition-colors cursor-pointer"
+                                title="Baixar gabarito (CSV)"
+                              >
+                                <FileDown className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteAnswerKey(k.pillar, k.stage)}
+                                className="p-1.5 rounded-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-400/40 transition-colors cursor-pointer"
+                                title="Remover gabarito"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

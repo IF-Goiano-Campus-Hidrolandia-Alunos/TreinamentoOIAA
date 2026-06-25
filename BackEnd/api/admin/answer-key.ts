@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { applyCors, deleteAnswerKey, ensureSchema, getSql, isAdmin, setAnswerKey } from "../_db";
+import { applyCors, deleteAnswerKey, ensureSchema, getAnswerKey, getSql, isAdmin, setAnswerKey } from "../_db";
 import { parseCsvMap } from "../../lib/csv";
 import { GRADING_CONFIGS } from "../../lib/grading";
 import type { PillarId } from "../../lib/types";
@@ -18,6 +18,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await ensureSchema(sql);
     if (req.method === "GET") {
+      // Com pillar+stage: retorna o gabarito completo (para download/edicao pelo tutor).
+      const qp = typeof req.query.pillar === "string" ? req.query.pillar.toLowerCase() : "";
+      const qs = typeof req.query.stage === "string" ? req.query.stage.toLowerCase() : "";
+      if (qp && qs) {
+        const ak = await getAnswerKey(sql, qp, qs);
+        if (!ak) return res.status(404).json({ error: "gabarito nao encontrado" });
+        return res.status(200).json({ pillar: qp, stage: qs, metric: ak.metric, keys: ak.keys });
+      }
+      // Sem params: lista os gabaritos cadastrados (metadados).
       const rows = (await sql`
         SELECT pillar, stage, metric, updated_at,
                (SELECT count(*) FROM jsonb_object_keys(keys)) AS n
