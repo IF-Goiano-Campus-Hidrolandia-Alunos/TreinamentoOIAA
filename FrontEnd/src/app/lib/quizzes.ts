@@ -4,7 +4,6 @@ export interface Question {
   id: string;
   text: string;
   options: string[];
-  correctIndex?: number;
 }
 
 export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
@@ -19,7 +18,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Traduzir o texto de portugues para outros idiomas automaticamente.",
           "Corrigir erros gramaticais e ortograficos do manuscrito."
         ],
-        correctIndex: 1
       },
       {
         id: "nlp_t2",
@@ -30,7 +28,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Porque os modelos de NLP de ultima geracao nao suportam acentuacao grafica.",
           "Porque o portugues exige obrigatoriamente o uso de SentencePiece para qualquer frase."
         ],
-        correctIndex: 0
       },
       {
         id: "nlp_t3",
@@ -40,7 +37,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Identificar a autoria secreta e a data exata em que o livro foi escrito.",
           "Prever quais palavras preenchem corretamente as lacunas corrompidas no texto."
         ],
-        correctIndex: 2
       }
     ],
     guided: [
@@ -52,7 +48,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "transformers",
           "scikit-learn"
         ],
-        correctIndex: 1
       },
       {
         id: "nlp_g2",
@@ -62,7 +57,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "random_split",
           "train_test_split"
         ],
-        correctIndex: 2
       }
     ],
     unguided: [
@@ -74,7 +68,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Testar diferentes tipos de tokenizadores (WordPiece, BPE, SentencePiece) e calibrar o tamanho do vocabulario.",
           "Remover todas as pontuacoes, acentos e espacos das frases."
         ],
-        correctIndex: 1
       }
     ]
   },
@@ -88,7 +81,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "43 tipos de placas de transito regulamentadas.",
           "43 cores de sinalizacao de rodovias brasileiras."
         ],
-        correctIndex: 1
       },
       {
         id: "vc_t2",
@@ -98,7 +90,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "MLP (Multi-Layer Perceptron)",
           "ResNet152"
         ],
-        correctIndex: 0
       },
       {
         id: "vc_t3",
@@ -108,7 +99,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Ajustar os pesos do modelo para minimizar a funcao de perda com base nos erros.",
           "Visualizar as imagens em graficos no matplotlib."
         ],
-        correctIndex: 1
       }
     ],
     guided: [
@@ -120,7 +110,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "224x224",
           "48x48"
         ],
-        correctIndex: 2
       },
       {
         id: "vc_g2",
@@ -130,7 +119,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Aumentar drasticamente a taxa de aprendizado (learning rate).",
           "Desativar a checagem do conjunto de validacao."
         ],
-        correctIndex: 0
       }
     ],
     unguided: [
@@ -142,7 +130,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "SGD simples (sem momentum)",
           "RMSprop com learning rate gigante"
         ],
-        correctIndex: 0
       }
     ]
   },
@@ -156,7 +143,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Rate of Maximum Score Efficiency.",
           "Root Mean Squared Error (Raiz do Erro Quadratico Medio), que avalia o desvio das notas previstas."
         ],
-        correctIndex: 2
       },
       {
         id: "am_t2",
@@ -166,7 +152,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Facilitar a convergencia do otimizador do modelo de fatoracao de matrizes.",
           "Garantir que todos os usuarios tenham notas iguais."
         ],
-        correctIndex: 1
       },
       {
         id: "am_t3",
@@ -176,7 +161,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "SVD (Singular Value Decomposition) ou camadas de Embeddings.",
           "K-Means Clustering."
         ],
-        correctIndex: 1
       }
     ],
     guided: [
@@ -188,7 +172,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "title, genre e year",
           "userName, movieTitle e timestamp"
         ],
-        correctIndex: 0
       },
       {
         id: "am_g2",
@@ -198,7 +181,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Separar uma porcentagem dos dados (ex: 20%) de forma aleatoria ou temporal antes do treinamento.",
           "Remover usuarios com poucas avaliacoes do dataset."
         ],
-        correctIndex: 1
       }
     ],
     unguided: [
@@ -210,7 +192,6 @@ export const QUIZZES: Record<PillarId, Record<string, Question[]>> = {
           "Substituir todos os valores nulos por nota maxima 5.",
           "Apenas embaralhar as linhas do dataset original."
         ],
-        correctIndex: 0
       }
     ]
   }

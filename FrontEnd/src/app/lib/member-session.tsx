@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useTeams } from "./teams-store";
 import type { PillarId, StageId, ScoreEntry } from "./types";
-import { QUIZZES } from "./quizzes";
 
 const SESSION_KEY = "ifg-member-session";
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "");
@@ -156,15 +155,11 @@ export function MemberSessionProvider({ children }: { children: ReactNode }) {
       let points = 0;
 
       if (kind === "quiz") {
-        const questions = QUIZZES[pillar]?.[stage] || [];
-        const answers = payload.answers || [];
-        let correct = 0;
-        questions.forEach((q, i) => {
-          if (answers[i] === q.correctIndex) {
-            correct++;
-          }
-        });
-        points = questions.length > 0 ? Math.round(maxPoints * (correct / questions.length)) : 0;
+        // Modo local (sem backend) e apenas demonstrativo: o gabarito NAO fica no
+        // bundle do front (anti-cola), entao nao da pra corrigir aqui. A correcao
+        // real acontece no servidor (/api/submit) quando ha backend. Em demo,
+        // concede a pontuacao cheia so para o fluxo ficar navegavel.
+        points = maxPoints;
       } else {
         // Métrica local
         const value = Number(payload.value);
